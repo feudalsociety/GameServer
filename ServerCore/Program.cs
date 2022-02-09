@@ -6,31 +6,51 @@ namespace ServerCore
 {
     class Program
     {
-        // Thread로 A와 B가 동시에 실행된다고 가정
-        int _answer;
-        bool _complete;
+        // 공유 변수 접근에 대한 문제점 실험, race condition
+        static int number = 0;
 
-        void A()
+        static void Thread_1()
         {
-            _answer = 123;
-            Thread MemoryBarrier(); // Store 후 반영
-            _complete = true;
-            Thread MemoryBarrier(); // Store 후 반영
-        }
+            // atomic - 원자성
+            // 집행검 User2 인벤에 넣어라 - ok
+            // 집행검 User1 인벤에서 없애라 - fail
 
-        void B()
-        {
-            Thread MemoryBarrier(); // Read 하기전에 동기화
-            if(_complete)
+            for(int i = 0; i < 100000; i++)
             {
-                Thread MemoryBarrier();
-                Console.WriteLine(_answer); // Read 하기전에 동기화
+                // 성능에서 손해를 본다는 단점. memory barrier를 간접적으로 사용, number을 volatile로 할 필요가 없음
+                // All or Nothing, 한번에 하나만 작업 가능
+                int aftervalue = Interlocked.Increment(ref number); // ref가 꼭 붙어야한다.
+                // number++;
+
+                // int temp = number;
+                // temp += 1;
+                // number = temp;
             }
         }
 
-        static void main(string[] args)
+        static void Thread_2()
         {
-            
+            for (int i = 0; i < 100000; i++)
+            {
+                Interlocked.Decrement(ref number);
+                // number--;
+
+                // int temp = number;
+                // temp -= 1;
+                // number = temp;
+            }
         }
+
+        static void Main(string[] args)
+        {
+            Task t1 = new Task(Thread_1);
+            Task t2 = new Task(Thread_2);
+            t1.Start();
+            t2.Start();
+
+            Task.WaitAll(t1, t2);
+            Console.WriteLine(number);
+        }
+        
     }
 }
