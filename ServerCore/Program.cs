@@ -6,38 +6,58 @@ namespace ServerCore
 {
     class Program
     {
-        // 공유 변수 접근에 대한 문제점 실험, race condition
         static int number = 0;
+        static object _obj = new object();
 
         static void Thread_1()
         {
-            // atomic - 원자성
-            // 집행검 User2 인벤에 넣어라 - ok
-            // 집행검 User1 인벤에서 없애라 - fail
-
             for(int i = 0; i < 100000; i++)
             {
-                // 성능에서 손해를 본다는 단점. memory barrier를 간접적으로 사용, number을 volatile로 할 필요가 없음
-                // All or Nothing, 한번에 하나만 작업 가능
-                int aftervalue = Interlocked.Increment(ref number); // ref가 꼭 붙어야한다.
-                // number++;
+                // 상호배제 Mutual exclusive
+                lock(_obj) // 알아서 열어줌
+                {
+                    number++;
+                }
 
-                // int temp = number;
-                // temp += 1;
-                // number = temp;
+                // Critical section, c++ std::mutex
+                Monitor.Enter(_obj); // 문을 잠근다.
+                number++;
+                return;
+
+                // if(number == 10000)
+                // {
+                //     Monitor.Exit(_obj); 
+                //     return;
+                // }
+
+                Monitor.Exit(_obj);
+
+                // try
+                // {
+                //     Monitor.Enter(_obj);
+                //     number++;
+                //     return;
+                // }
+                // finally
+                // {
+                //     Monitor.Exit(_obj);
+                // }
             }
         }
 
+        // Deadlock
         static void Thread_2()
         {
             for (int i = 0; i < 100000; i++)
             {
-                Interlocked.Decrement(ref number);
-                // number--;
+                lock (_obj)
+                {
+                    number--;
+                }
 
-                // int temp = number;
-                // temp -= 1;
-                // number = temp;
+                // Monitor.Enter(_obj);
+                // number--;
+                // Monitor.Exit(_obj);
             }
         }
 
