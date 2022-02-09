@@ -4,57 +4,33 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    // 메모리 배리어
-    // A) 코드 재배치 억제
-    // B) 가시성 - 실제 메모리에 반영, 동가화
-
-    // 1) Full memory Barrier(ASM MFENCE, C# Thread.MemoryBarrier) : Store/Load 둘다 막는다.
-    // 2) Store Memory Barrier (ASM SFENCE) : Store만 막는다.
-    // 3) Load Memory Barrier (ASM LFENCE) : Load만 막는다.
-
-    // volatile : MemoryBarrier가 간접적으로 동작한다. lock & atomic도 내부적으로 구현되어 있다.
-
     class Program
     {
-        // compiler 최적화 뿐만 아니라 하드웨어도 오류를 만들어냄 하드웨어 최적화
-        // 의존성이 없는 명령어면 순서를 바꾼다.
-        static int x = 0;
-        static int y = 0;
-        static int r1 = 0;
-        static int r2 = 0;
+        // Thread로 A와 B가 동시에 실행된다고 가정
+        int _answer;
+        bool _complete;
 
-        static void Thread_1()
+        void A()
         {
-            y = 1;
-            Thread MemoryBarrier();
-            r1 = x;
+            _answer = 123;
+            Thread MemoryBarrier(); // Store 후 반영
+            _complete = true;
+            Thread MemoryBarrier(); // Store 후 반영
         }
 
-        static void Thread_2()
+        void B()
         {
-            x = 1;
-            Thread MemoryBarrier();
-            r2 = y;
+            Thread MemoryBarrier(); // Read 하기전에 동기화
+            if(_complete)
+            {
+                Thread MemoryBarrier();
+                Console.WriteLine(_answer); // Read 하기전에 동기화
+            }
         }
 
         static void main(string[] args)
         {
-            int count = 0;
-            while(true)
-            {
-                count++;
-                x = y = r1 = r2 = 0;
-
-                Task t1 = new Task(Thread_1);
-                Task t2 = new Task(Thread_2);
-
-                t1.Start();
-                t2.Start();
-
-                Task.WaitAll(t1, t2);
-                if (r1 == 0 && r2 == 0) break;
-            }
-            Console.WriteLine($"{count}만에 빠져나옴");
+            
         }
     }
 }
