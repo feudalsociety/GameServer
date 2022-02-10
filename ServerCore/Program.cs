@@ -6,48 +6,27 @@ namespace ServerCore
 {
     class SpinLock
     {
-        // volatile bool _locked = false;
         volatile int _locked = 0;
 
         public void Aquire()
         {   
             while(true)
             {
-                // int original = Interlocked.Exchange(_locked, 1); // original은 stack에 있는 경합하지 않는 하나의 thread에서만 사용
-                // if (original == 0) break;
-
-                // CAS Compare and Swap
                 int expected = 0;
                 int desired = 1;
-                // _locked와 expected을 비교해서 같으면 desired을 넣음
+
                 if(Interlocked.CompareExchange(ref _locked, desired, expected) == expected) 
                     break;  
+
+                // 쉬다 올게~ 3가지 방법
+                // Thread.Sleep(1); // 무조건 휴식 => 무조건 1ms 쉬고 싶어요
+                // Thread.Sleep(0); // 조건부 양보 => 나보다 우선순위가 낮은 애들한테는 양보 불가 => 우선순위가 나보다 높은 쓰레드가 없으면 다시 본인선택
+                Thread.Yield();  // 관대한 양보 => 지금 실행 가능한 쓰레드가 있으면 실행하세요 => 없으면 남은시간 본인이 소진
             }
-
-            // {
-            //     int original = _locked;
-            //     _locked = 1;
-            //     if(original == 0) break;
-            // }
-            // {
-            //     if(_locked == 0) _locked = 1; // 범용적
-            // }
-
-            // ============================================================
-                    
-            // // 문안에 들어가서 잠그는거 까지 하나의 행동으로 이어져야함
-            // while(_locked)
-            // {
-            //     // 잠김이 풀리기를 기다림
-            // }
-
-            // // 내꺼
-            // _locked = true;
         }
 
         public void Release()
         {
-            // _locked = false;
             _locked = 0;
         }
     }
