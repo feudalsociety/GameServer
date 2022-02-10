@@ -4,89 +4,89 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    // 꼼수 - lock을 class로 wrapping한다.
-    class FastLock
+    class SpinLock
     {
-        public int id; // id 호출 순서를 추적했다가 graph 상에 cycle 있는지 판별
-    }
+        // volatile bool _locked = false;
+        volatile int _locked = 0;
 
-    class SessionManager
-    {
-        static object _lock = new object();
-
-        public static void TestSession()
-        {
-            lock(_lock)
+        public void Aquire()
+        {   
+            while(true)
             {
+                // int original = Interlocked.Exchange(_locked, 1); // original은 stack에 있는 경합하지 않는 하나의 thread에서만 사용
+                // if (original == 0) break;
 
+                // CAS Compare and Swap
+                int expected = 0;
+                int desired = 1;
+                // _locked와 expected을 비교해서 같으면 desired을 넣음
+                if(Interlocked.CompareExchange(ref _locked, desired, expected) == expected) 
+                    break;  
             }
+
+            // {
+            //     int original = _locked;
+            //     _locked = 1;
+            //     if(original == 0) break;
+            // }
+            // {
+            //     if(_locked == 0) _locked = 1; // 범용적
+            // }
+
+            // ============================================================
+                    
+            // // 문안에 들어가서 잠그는거 까지 하나의 행동으로 이어져야함
+            // while(_locked)
+            // {
+            //     // 잠김이 풀리기를 기다림
+            // }
+
+            // // 내꺼
+            // _locked = true;
         }
 
-        public static void Test()
+        public void Release()
         {
-            lock(_lock)
-            {
-                UserManager.TestUser();
-            }
-        }
-    }
-
-    class UserManager
-    {
-        static object _lock = new object();
-
-        public static void Test()
-        {
-            // Monitor.TryEnter()
-            lock(_lock)
-            {
-                SessionManager.TestSession();
-            }
-        }
-
-        public static void TestUser()
-        {
-            lock(_lock)
-            {
-
-            }
+            // _locked = false;
+            _locked = 0;
         }
     }
 
     class Program
     {
-        static int number = 0;
-        static object _obj = new object();
+        static int _num = 0;
+        static SpinLock _lock = new SpinLock();
 
         static void Thread_1()
         {
-            for(int i = 0; i < 10000; i++)
+            for(int i = 0; i < 100000; i++)
             {
-                SessionManager.Test();
+                _lock.Aquire();
+                _num++;
+                _lock.Release();
             }
         }
 
-        // Deadlock
         static void Thread_2()
         {
-            for (int i = 0; i < 10000; i++)
+            for(int i = 0; i < 100000; i++)
             {
-                UserManager.Test();
+                _lock.Aquire();
+                _num--;
+                _lock.Release();
             }
         }
 
         static void Main(string[] args)
-        {
-            Task t1 = new Task(Thread_1);
-            Task t2 = new Task(Thread_2);
+        {   
+            Thread t1 = new Thread(Thread_1);
+            Thread t2 = new Thread(Thread_2);
+
             t1.Start();
-
-            Thread.Sleep(100);
-
             t2.Start();
 
             Task.WaitAll(t1, t2);
-            Console.WriteLine(number);
+            Console.WriteLine(_num);
         }
         
     }
