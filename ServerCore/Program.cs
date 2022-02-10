@@ -4,55 +4,55 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class SpinLock
+    class Lock
     {
-        volatile int _locked = 0;
+        // bool <= 커널
+        // AutoResetEvent _available = AutoResetEvent(true); // true 문이 열린상태, false 닫힌 상태
+
+        ManualResetEvent _available = new ManualResetEvent(true);
 
         public void Aquire()
-        {   
-            while(true)
-            {
-                int expected = 0;
-                int desired = 1;
+        {
+            // _available.WaitOne(); // 입장 시도, 문을 자동으로 닫음
+            // _available.Reset(); 
 
-                if(Interlocked.CompareExchange(ref _locked, desired, expected) == expected) 
-                    break;  
-
-                // 쉬다 올게~ 3가지 방법
-                // Thread.Sleep(1); // 무조건 휴식 => 무조건 1ms 쉬고 싶어요
-                // Thread.Sleep(0); // 조건부 양보 => 나보다 우선순위가 낮은 애들한테는 양보 불가 => 우선순위가 나보다 높은 쓰레드가 없으면 다시 본인선택
-                Thread.Yield();  // 관대한 양보 => 지금 실행 가능한 쓰레드가 있으면 실행하세요 => 없으면 남은시간 본인이 소진
-            }
+            _available.WaitOne();
+            _available.Reset(); // 두개로 나뉘면 안됨
         }
 
         public void Release()
         {
-            _locked = 0;
+            // _available.Set(); // 문을 열어줌
+            _available.Set();
         }
     }
 
+    // 운영체제에게 요청을 하기때문에 큰 부담이 됨
+    // 이거 말고도 kernal을 이용해서 순서를 정하는게 있다. 커널 동기화 객체 : mutex
+    // 많은 정보를 가지고 있다. 몇번이나 잠궜는지 counting, threadId
     class Program
     {
         static int _num = 0;
-        static SpinLock _lock = new SpinLock();
+        // static SpinLock _lock = new SpinLock();
+        static Mutex _lock = new Mutex();
 
         static void Thread_1()
         {
-            for(int i = 0; i < 100000; i++)
+            for(int i = 0; i < 10000; i++)
             {
-                _lock.Aquire();
+                _lock.WaitOne();
                 _num++;
-                _lock.Release();
+                _lock.ReleaseMutex();
             }
         }
 
         static void Thread_2()
         {
-            for(int i = 0; i < 100000; i++)
+            for(int i = 0; i < 10000; i++)
             {
-                _lock.Aquire();
+                _lock.WaitOne();
                 _num--;
-                _lock.Release();
+                _lock.ReleaseMutex();
             }
         }
 
@@ -66,7 +66,6 @@ namespace ServerCore
 
             Task.WaitAll(t1, t2);
             Console.WriteLine(_num);
-        }
-        
+        }   
     }
 }
