@@ -4,68 +4,73 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class Lock
-    {
-        // bool <= 커널
-        // AutoResetEvent _available = AutoResetEvent(true); // true 문이 열린상태, false 닫힌 상태
-
-        ManualResetEvent _available = new ManualResetEvent(true);
-
-        public void Aquire()
-        {
-            // _available.WaitOne(); // 입장 시도, 문을 자동으로 닫음
-            // _available.Reset(); 
-
-            _available.WaitOne();
-            _available.Reset(); // 두개로 나뉘면 안됨
-        }
-
-        public void Release()
-        {
-            // _available.Set(); // 문을 열어줌
-            _available.Set();
-        }
-    }
-
-    // 운영체제에게 요청을 하기때문에 큰 부담이 됨
-    // 이거 말고도 kernal을 이용해서 순서를 정하는게 있다. 커널 동기화 객체 : mutex
-    // 많은 정보를 가지고 있다. 몇번이나 잠궜는지 counting, threadId
     class Program
     {
-        static int _num = 0;
-        // static SpinLock _lock = new SpinLock();
-        static Mutex _lock = new Mutex();
+        // 1. 근성, 2. 양보, 3. 갑질
 
-        static void Thread_1()
+        // 상호 배제 Mutual Exclusion
+        // 내부적으로 Monitor class 이용
+        static object _lock = new object();
+        static SpinLock _lock2 = new SpinLock(); // 이미 구현된 spinlock. 1과 2 혼합
+        static Mutex _lock3 = new Mutex(); // 느리다. 별도의 프로그램도 순서를 맞출수 있긴한데 MMO Server에서는 안쓸거임
+        // 직접 만든다. 
+        // 컨텐츠도 멀티쓰레드로 만들것인가? - 경계가 없는 rpg
+
+        // 다른 형태의 lock
+        // [] [] [] + [] [] 바꿀때만 상호 배타적으로 막을 수 있다면
+        class Reward
         {
-            for(int i = 0; i < 10000; i++)
-            {
-                _lock.WaitOne();
-                _num++;
-                _lock.ReleaseMutex();
-            }
+
+        }
+        // RWLock ReaderWriteLock Slim 붙은것이 더 최신버전
+        static ReaderWriterLockSlim _lock3 = new ReaderWriterLockSlim();
+
+
+        // 99.99999 + 0.00001 
+        static Reward GetRewardByid(int id)
+        {
+            // 아무도 writelock을 잡고 있지 않으면 동시다발적으로 들어올 수 있다.
+            _lock3.EnterReadLock(); 
+            _lock3.ExitReadLock();
+
+            // lock(_lock) 
+            // { 
+            //     // 그냥 읽을 때는 동시다발적으로 접근할 수 있다가 바꿀때만 배타적으로 막음
+            // }
+            return null;
         }
 
-        static void Thread_2()
+        // 0.00001
+        static void AddReward(Reward reward)
         {
-            for(int i = 0; i < 10000; i++)
-            {
-                _lock.WaitOne();
-                _num--;
-                _lock.ReleaseMutex();
-            }
+            _lock3.EnterWriteLock();
+            _lock3.ExitWriteLock();
+
+            // lock (_lock)
+            // {
+               
+            // }
+
+            return null;
         }
 
         static void Main(string[] args)
         {   
-            Thread t1 = new Thread(Thread_1);
-            Thread t2 = new Thread(Thread_2);
+            lock(_lock)
+            {
+                
+            }
 
-            t1.Start();
-            t2.Start();
-
-            Task.WaitAll(t1, t2);
-            Console.WriteLine(_num);
+            // SpinLock interface
+            bool lockTaken = false;
+            try
+            {
+                _lock2.Enter(ref lockTaken);
+            }
+            finally
+            {
+                if(lockTaken) _lock2.Exit(false);
+            }
         }   
     }
 }
