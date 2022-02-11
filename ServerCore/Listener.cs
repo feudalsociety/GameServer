@@ -12,7 +12,7 @@ namespace ServerCore
         Socket _listenSocket;
         Action<Socket> _onAcceptHandler;
 
-        public void init(IPEndPoint endPoint, Action<Socket> onAcceptHandler)
+        public void Init(IPEndPoint endPoint, Action<Socket> onAcceptHandler)
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _onAcceptHandler += onAcceptHandler;
@@ -24,9 +24,9 @@ namespace ServerCore
             // backlog : 최대 대기수
             _listenSocket.Listen(10);
 
-            // 한번만 만들면 재사용 가능
+            // 한번만 만들면 재사용 가능, 동시다발적으로 많은 유저를 받아야할 때 이부분을 for문을 걸어 늘려준다.
             SocketAsyncEventArgs args = new SocketAsyncEventArgs(); 
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAceeptCompleted);
+            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
             RegisterAccept(args);
         }
 
@@ -36,11 +36,12 @@ namespace ServerCore
             args.AcceptSocket = null;
 
             bool pending = _listenSocket.AcceptAsync(args);
-            if (pending == false)
-                OnAceeptCompleted(null, args);
+            if (pending == false) // 동시다발적으로 계속 false만 나오는 경우는 거의 없다.
+                OnAcceptCompleted(null, args);
         }
 
-        void OnAceeptCompleted(object sender, SocketAsyncEventArgs args)
+        // 콜백함수는 별도의 Thread를 이용, ThreadPool에서 뽑아서 실행 main과 race condition이 일어나지 않도록 주의
+        void OnAcceptCompleted(object sender, SocketAsyncEventArgs args)
         {
             if(args.SocketError == SocketError.Success)
             {
@@ -50,18 +51,8 @@ namespace ServerCore
             else 
                 Console.WriteLine(args.SocketError.ToString());
 
-            // SocketAsyncEventArgs 재사용 다음번을 위해서
+            // stackoverflow가 일어나지 않는다.
             RegisterAccept(args);
         }
-
-        // public void Accept()
-        // {
-        //     // 비동기, 성공하든 아니든 바로 return
-        //     // 실패해도 바로 빠져나오기 때문에 유저가 접속 요청을하면 알려줘야함 callback
-        //     // accept 요청 부분과 실제로 처리 부분이 둘로 분리
-        //     // _listenSocket.AcceptAsync( );
-
-        //     return _listenSocket.Accept();
-        // }
     }
 }

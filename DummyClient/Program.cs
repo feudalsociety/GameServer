@@ -27,12 +27,15 @@ namespace dummyClient
                     Console.WriteLine($"Connected to {socket.RemoteEndPoint.ToString()}");
 
                     // 보낸다
-                    byte[] sendBuff = Encoding.UTF8.GetBytes("Hello World");
-                    int sendBytes = socket.Send(sendBuff); // 여기서도 blocking 계열로 계속 대기하면 안됨
-
+                    for(int i = 0; i < 5; i++)
+                    {
+                        byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                        int sendBytes = socket.Send(sendBuff); 
+                    }
+              
                     // 받는다
                     byte[] recvBuff = new byte[1024];
-                    int recvBytes = socket.Receive(recvBuff); // 서버가 보내줄 때까지 계속 대기
+                    int recvBytes = socket.Receive(recvBuff); 
                     string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
                     Console.WriteLine($"[From Server] {recvData}");
 
