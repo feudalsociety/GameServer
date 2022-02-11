@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\user\\Desktop\\GameServer\\dummyClient\\dummyClient.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj",
       "projectName": "dummyClient",
-      "projectPath": "C:\\Users\\user\\Desktop\\GameServer\\dummyClient\\dummyClient.csproj",
+      "projectPath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj",
       "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\user\\Desktop\\GameServer\\dummyClient\\obj\\",
+      "outputPath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -65,7 +65,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.405\\RuntimeIdentifierGraph.json"
       }
     }
   }

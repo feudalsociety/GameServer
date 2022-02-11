@@ -1,40 +1,62 @@
 ﻿using System;
+using System.Text;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-
-// lock free programming와 유사
 
 namespace ServerCore
 {
     class Program
     {
-        // TLS value setting이 안되어있으면 넘겨준 코드를 실행
-        // 반드시 static 상황에서 사용해야하는건 아니지만 대부분의 상황에서는 static을 붙여서 사용하는 경우가 많다.
-        static ThreadLocal<string> ThreadName = new ThreadLocal<string>(() => {});
-
-        // TLS에서 사용하는 것은 굳이 lock을 걸지 않고 부담없이 뽑아서 쓸 수 있다. 공용 공간 접근 횟수 줄임
-
-        static void WhoAmI()
+        static void Main(string[] args)
         {
-            bool repeat = ThreadName.IsValueCreated;
-            if(repeat) Console.WriteLine(ThreadName.Value + "(repeat)");
-            else Console.WriteLine(ThreadName.Value);
+            // DNS (Domain Name System)
+            string host = Dns.GetHostName();
+            IPHostEntry ipHost = Dns.GetHostEntry(host);
+            IPAddress ipAddr = ipHost.AddressList[0];
+            IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777); 
 
-            // 같은 thread가 실행될 때마다 매번 덮어쓰고 있다.
-            // ThreadName.Value = $"My Name is {Thread.CurrentThread.ManagedThreadId}"; 
-            // Thread.Sleep(1000);
-            // Console.WriteLine(ThreadName.Value);
-        }
+            // 문지기
+            Socket listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp); // ipv4, or ipv6 / TCP 
 
-        static void main(string[] args)
-        {
-            ThreadPool.SetMinThreads(1, 1);
-            ThreadPool.SetMaxThreads(3, 3);
+            try
+            {
+                // 문지기 교육
+                listenSocket.Bind(endPoint);
 
-            // 넣어주는 action만큼을 task로 만들어 실행
-            Parallel.Invoke(WhoAmI, WhoAmI, WhoAmI, WhoAmI, WhoAmI, WhoAmI);
+                // 영업 시작
+                // backlog : 최대 대기수
+                listenSocket.Listen(10);
 
-            ThreadName.Dispose(); // 필요없으면 날림
+                while (true)
+                {
+                    Console.WriteLine("Listening...");
+
+                    // 손님을 입장시킨다. 클라이언트가 입장하지 않을경우? - blocking/non-blocking 
+                    // 다음단계로 넘어가지 않고 계속 대기한다.
+                    Socket clientSocket = listenSocket.Accept();
+
+                    // 받는다
+                    byte[] recvBuff = new byte[1024];
+                    int recvBytes = clientSocket.Receive(recvBuff);
+                    string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
+                    Console.WriteLine($"[From Client] {recvData}");
+
+                    // 보낸다
+                    byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server!");
+                    clientSocket.Send(sendBuff); // Send도 저쪽에서 안받으면 대기
+
+                    // 쫒아낸다.
+                    clientSocket.Shutdown(SocketShutdown.Both); // 옵션 : 더이상 듣기도 싫고 말하기도 싫다 
+                    clientSocket.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
         }
     }
 }

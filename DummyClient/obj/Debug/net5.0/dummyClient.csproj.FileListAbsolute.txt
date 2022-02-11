@@ -1,0 +1,16 @@
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.exe
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.deps.json
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.runtimeconfig.json
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.runtimeconfig.dev.json
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.dll
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\ref\dummyClient.dll
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\dummyClient.pdb
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.csproj.AssemblyReference.cache
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.AssemblyInfo.cs
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.dll
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\ref\dummyClient.dll
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.pdb
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.genruntimeconfig.cache
