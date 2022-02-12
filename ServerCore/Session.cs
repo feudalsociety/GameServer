@@ -7,45 +7,40 @@ namespace ServerCore
 {
     class Session
     {
+        // 일정한 시간동안 몇 byte들 보냈는지 추적해서 심하게 많이 보내면 쉬면서 하는게 좋긴함
+        // 아니면 유저가 보내는 데이터가 비정상적이면 recieve할때 check해서 disconnet하는 기능이 추가되야함
+        // 패킷 모아보내기는 이것보다 더 많은 작업이 필요
+        // 패킷 모으는것을 서버 엔진에서 할것인지, 컨텐츠에서 모아서 send를 한번만 요청할 것인지
+
         Socket _socket;
         int _disconnected = 0;
 
-        object _lock = new object(); // send를 multithread 환경에서 실행하기 위한 lock
+        object _lock = new object(); 
         Queue<byte[]> _sendQueue = new Queue<byte[]>();
-        bool _pending = false; // pending이 false 일경우 queue에만 쌓는다.
-        SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs(); // 낚시대 하나만 사용
+        // bool _pending = false;
+        List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
+        SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
+        SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
 
         public void Start(Socket socket)
         {
             _socket = socket;
-            SocketAsyncEventArgs recvArgs = new SocketAsyncEventArgs();
-            recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
-            recvArgs.SetBuffer(new byte[1024], 0, 1024);
+            _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
+            _recvArgs.SetBuffer(new byte[1024], 0, 1024);
 
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
 
-            RegisterRecv(recvArgs);
+            RegisterRecv();
         }
 
-        // Send는 Recieve와 같이 예약 불가능 정해진 시점이 없음, 원하는 타이밍에 호출해야하기 떄문에
-        // 동시다발적으로 send를 한다면? - 다행히 sendAsync가 동시다발적으로 호출된다고 뻑나는 함수는 아님
+
         public void Send(byte[] sendBuff)
         {
-            // _socket.Send(sendBuff);
-            // 매번 event를 만드는것보다 재사용하면 좋을것 같다
-            // SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
-            // sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
-
-            // SendAsync가 끝나고 OnSendCompleted가 완료되기전까지 queue에만 쌓아놓고 완료되었으면 queue를 비우는 방식
-
             lock(_lock)
             {
                 _sendQueue.Enqueue(sendBuff);
-                if(_pending == false) RegisterSend();
+                if(_pendingList == 0) RegisterSend(); // if(_pending == false)
             }
-
-            // sendArgs.SetBuffer(sendBuff, 0, sendBuff.Length);
-            // RegisterSend();
         }
 
         public void Disconnect()
@@ -58,18 +53,31 @@ namespace ServerCore
 
         #region 네트워크 통신
 
-        void RegisterSend() // void RegisterSend(SocketAsyncEventArgs args)
+        void RegisterSend() 
         {
-            _pending = true;
-            // user mode에서 network 패킷을 보내는것은 불가능하고 kernal에서 처리하는 것이기 때문에 쉽게 막쓰는건 문제가 있다.
-            byte[] buff = _sendQueue.Dequeue();
-            _sendArgs.SetBuffer(buff, 0, buff.Length);
+            // _pending = true; _pendinglist가 대신해줌
+            _pendingList.Clear(); // 굳이 필요없는 부분이긴 함
 
+            // byte[] buff = _sendQueue.Dequeue();
+            // _sendArgs.SetBuffer(buff, 0, buff.Length);
+
+            // BufferList로 한번에 보내면 좀더 효율적, setbuffer이나 list 둘중하나만 사용해야함
+            while(_sendQueue.Count > 0)
+            {
+                buff = _sendQueue.Dequeue();
+                // ArraySegment structure으로 heap이 아닌 stack에 할당됨, 실제 add할때 값이 복사되는 형태
+                // c# 같은경우 포인터를 사용하기 어려움으로 이렇게 넘겨줌
+                // bufferList에 넣을 때 완성된 list 형태로 넣어줘야함
+                // _sendArgs.BufferList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
+                _pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
+            }
+
+            _sendArgs.BufferList = _pendingList;
+            
             bool pending = _socket.SendAsync(_sendArgs);
             if (pending == false) OnSendCompleted(null, _sendArgs);
         }
 
-        // RegisterSend 뿐만아니라 다른 Thread에서 callback 방식으로 호출될 수 도 있다. 그래서 lock이 필요함
         void OnSendCompleted(object sender, SocketAsyncEventArgs args)
         {
             lock(_lock)
@@ -78,12 +86,15 @@ namespace ServerCore
                 {
                     try
                     {
-                        if(_sendQueue.Count > 0)
-                        {
+                        // null을 굳이 넣을 필요는 없긴함
+                        _sendArgs.BufferList = null; 
+                        _pendingList.Clear();
+
+                        Console.WriteLine($"Transferred bytes : {_sendArgs.BytesTransferred}");
+
+                        if(_sendQueue.Count > 0) // 처리하는 도중에 누가도 패킷을 넣었으면
                             RegisterSend();
-                        }
-                        else _pending = false;
-                        // RegisterSend(args); 재사용 불가능
+                        // else _pending = false;
                     }
                     catch (Exception e)
                     {
@@ -97,14 +108,12 @@ namespace ServerCore
             }
         }
 
-        void RegisterRecv(SocketAsyncEventArgs args) 
+        void RegisterRecv() 
         {
-            // non-blocking version
-            bool pending = _socket.ReceiveAsync(args);
-            if(pending == false) OnRecvCompleted(null, args);
+            bool pending = _socket.ReceiveAsync(_recvArgs);
+            if(pending == false) OnRecvCompleted(null, _recvArgs);
         }
 
-        // Thread가 동시다발적으로 여기에 들어오는 경우는 없다. event가 하나밖에 없음
         void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
         {
             if(args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
@@ -113,7 +122,7 @@ namespace ServerCore
                 {
                     string recvData = Encoding.UTF8.GetString(args.Buffer, 0, args.BytesTransferred);
                     Console.WriteLine($"[From Client] {recvData}");
-                    RegisterRecv(args);
+                    RegisterRecv();
                 }
                 catch(Exception e)
                 {
