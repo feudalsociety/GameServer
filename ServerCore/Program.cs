@@ -7,30 +7,40 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
+    // 상속방식이 아니라 Handler 방식이었으면 다시 한번 Session을 찾아야함
+    class GameSession : Session
+    {
+        // 엔진과 컨텐츠 분리
+        public override void OnConnected(EndPoint endPoint)
+        {
+            Console.WriteLine("OnConnected : {0}", endPoint);
+
+            byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server!");
+            Send(sendBuff);
+            Thread.Sleep(1000);
+            Disconnect();
+        }
+
+        public override void OnDisconnected(EndPoint endPoint)
+        {
+           Console.WriteLine($"OnDisconnected : {endPoint}");
+        }
+
+        public override void OnRecv(ArraySegment<byte> buffer)
+        {
+            string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);
+            Console.WriteLine($"[From Client] {recvData}");
+        }
+
+        public override void OnSend(int numofBytes)
+        {
+            Console.WriteLine($"Transferred bytes : {numofBytes}");
+        }
+    }
+
     class Program
     {
         static Listener _listener = new Listener();
-
-        static void onAcceptHandler(Socket clientSocket)
-        {
-            try
-            {
-                Session session = new Session();
-                session.Start(clientSocket);
-
-                byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server!");
-                session.Send(sendBuff);
-
-                Thread.Sleep(1000);
-
-                session.Disconnect();
-                session.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
 
         static void Main(string[] args)
         {
@@ -40,7 +50,7 @@ namespace ServerCore
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777); 
 
-            _listener.Init(endPoint, onAcceptHandler);
+            _listener.Init(endPoint, () => { return new GameSession(); });
             Console.WriteLine("Listening...");
 
             while (true)
