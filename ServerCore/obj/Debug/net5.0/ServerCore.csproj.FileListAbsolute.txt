@@ -22,11 +22,7 @@ C:\Users\user\Desktop\unity study\GameServer\ServerCore\obj\Debug\net5.0\ServerC
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\obj\Debug\net5.0\ServerCore.dll
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\obj\Debug\net5.0\ref\ServerCore.dll
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\obj\Debug\net5.0\ServerCore.pdb
-C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.exe
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.deps.json
-C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.runtimeconfig.json
-C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.runtimeconfig.dev.json
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.dll
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ref\ServerCore.dll
 C:\Users\user\Desktop\unity study\GameServer\ServerCore\bin\Debug\net5.0\ServerCore.pdb
-C:\Users\user\Desktop\unity study\GameServer\ServerCore\obj\Debug\net5.0\ServerCore.genruntimeconfig.cache

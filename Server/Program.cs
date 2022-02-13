@@ -4,10 +4,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using ServerCore;
 
-namespace ServerCore
+namespace Server
 {
-    // 상속방식이 아니라 Handler 방식이었으면 다시 한번 Session을 찾아야함
     class GameSession : Session
     {
         // 엔진과 컨텐츠 분리
@@ -23,7 +23,7 @@ namespace ServerCore
 
         public override void OnDisconnected(EndPoint endPoint)
         {
-           Console.WriteLine($"OnDisconnected : {endPoint}");
+            Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
         public override void OnRecv(ArraySegment<byte> buffer)
@@ -37,6 +37,7 @@ namespace ServerCore
             Console.WriteLine($"Transferred bytes : {numofBytes}");
         }
     }
+        
 
     class Program
     {
@@ -48,14 +49,14 @@ namespace ServerCore
             string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
-            IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777); 
+            IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
             _listener.Init(endPoint, () => { return new GameSession(); });
             Console.WriteLine("Listening...");
 
             while (true)
             {
-                
+
             }
         }
     }

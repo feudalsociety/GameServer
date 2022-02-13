@@ -4,18 +4,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-
 namespace ServerCore
 {
-    class Listener
+    public class Listener
     {
+        
         Socket _listenSocket;
         Func<Session> _sessionFactory; // 어떤 Session을 만들어줄지 정의
 
         public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            sessionFactory += onAcceptHandler;
+            _sessionFactory = sessionFactory;
 
             // 문지기 교육
             _listenSocket.Bind(endPoint);
@@ -45,9 +45,6 @@ namespace ServerCore
         {
             if(args.SocketError == SocketError.Success)
             {
-                // 나중에 GameSession이 아니라 다른 Session이 될 수도 있어서 문제가 있다.
-                // 어떤 Session을 만들건지 정해야함
-                // GameSession session = new GameSession();
                 Session session = _sessionFactory.Invoke();
                 session.Start(args.AcceptSocket);
                 // 여기서 다음으로 넘어가는 순간에 client에서 연결을 끊어버리면 밑에 라인에서 에러가난다.

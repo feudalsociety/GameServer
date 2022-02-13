@@ -1,13 +1,13 @@
 {
 	"folders": [
 		{
-			"path": "server"
-		},
-		{
 			"path": "ServerCore"
 		},
 		{
 			"path": "DummyClient"
+		},
+		{
+			"path": "Server"
 		}
 	],
 	"settings": {}

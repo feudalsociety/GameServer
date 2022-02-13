@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "j8rEX6EwWJX7ZQ67INwmJ2TPO+9buxHl5AAkA0mEGwOt0JvE6LYTyr67QhfBaYH9/Pdko7y+cAP2PhSlWGbXCg==",
+  "dgSpecHash": "fJh7oiFWfN5mhZnfjs7GNllhszNkfW/GfVtKHB49iaL0QBPJng5DekW7y6SbQT6txqMSkJavOyDmg/iwfZlWaw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\server\\Server.csproj",
+  "projectFilePath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\Server\\Server.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

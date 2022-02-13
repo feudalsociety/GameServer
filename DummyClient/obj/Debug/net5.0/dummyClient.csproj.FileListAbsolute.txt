@@ -14,3 +14,6 @@ C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyC
 C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\ref\dummyClient.dll
 C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.pdb
 C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.genruntimeconfig.cache
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\ServerCore.dll
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\bin\Debug\net5.0\ServerCore.pdb
+C:\Users\user\Desktop\unity study\GameServer\DummyClient\obj\Debug\net5.0\dummyClient.csproj.CopyComplete

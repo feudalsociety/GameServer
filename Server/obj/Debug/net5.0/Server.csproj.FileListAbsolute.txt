@@ -14,3 +14,6 @@ C:\Users\user\Desktop\unity study\GameServer\server\obj\Debug\net5.0\Server.dll
 C:\Users\user\Desktop\unity study\GameServer\server\obj\Debug\net5.0\ref\Server.dll
 C:\Users\user\Desktop\unity study\GameServer\server\obj\Debug\net5.0\Server.pdb
 C:\Users\user\Desktop\unity study\GameServer\server\obj\Debug\net5.0\Server.genruntimeconfig.cache
+C:\Users\user\Desktop\unity study\GameServer\Server\bin\Debug\net5.0\ServerCore.dll
+C:\Users\user\Desktop\unity study\GameServer\Server\bin\Debug\net5.0\ServerCore.pdb
+C:\Users\user\Desktop\unity study\GameServer\Server\obj\Debug\net5.0\Server.csproj.CopyComplete

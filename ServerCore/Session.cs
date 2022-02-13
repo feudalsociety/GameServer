@@ -6,19 +6,11 @@ using System.Text;
 using System.Threading;
 
 // ReciveComplete했을 때 handler를 실행하기 위한 event 받는 방식
-// 1. Eventhandler로 연결, 2. Session 상속받는 방법
+// 1. Eventhandler Class로 연결, 2. Session 상속받는 방법
 
 namespace ServerCore
 {
-    // class SessionHandler
-    // {
-    //     public void OnConnected(EndPoint endPoint) {}
-    //     public void OnRecv(ArraySegment<byte> buffer) {}
-    //     public void OnSend(int numofBytes) {}
-    //     public void OnDisconnected(EndPoint endPoint) {}
-    // }
-
-    abstract class Session
+    public abstract class Session
     {
         Socket _socket;
         int _disconnected = 0;
@@ -45,7 +37,6 @@ namespace ServerCore
             RegisterRecv();
         }
 
-
         public void Send(byte[] sendBuff)
         {
             lock(_lock)
@@ -59,7 +50,7 @@ namespace ServerCore
         {
             if (Interlocked.Exchange(ref _disconnected, 1) == 1) return;
            
-           OnDisconnected(_socket.RemoteEndPoint);
+            OnDisconnected(_socket.RemoteEndPoint);
             _socket.Shutdown(SocketShutdown.Both); 
             _socket.Close();
         }
