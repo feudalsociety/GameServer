@@ -26,10 +26,12 @@ namespace Server
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        public override void OnRecv(ArraySegment<byte> buffer)
+        // 완성이 안된 패킷, 부분적인 데이터라면 일부만 처리 
+        public override int OnRecv(ArraySegment<byte> buffer)
         {
             string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);
             Console.WriteLine($"[From Client] {recvData}");
+            return buffer.Count;
         }
 
         public override void OnSend(int numofBytes)

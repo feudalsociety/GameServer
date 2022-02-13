@@ -18,7 +18,7 @@ namespace dummyClient
             for (int i = 0; i < 5; i++)
             {
                 byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
-               Send(sendBuff);
+                Send(sendBuff);
             }
         }
 
@@ -27,10 +27,14 @@ namespace dummyClient
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        public override void OnRecv(ArraySegment<byte> buffer)
+        // 이동패킷 ((3,2) 좌표로 이동하고 싶다!)
+        // 패킷번호(15) 3 2
+        // TCP에서는 100byte를 보낸다고해서 무조건 100byte들 받는다는 보장이 없다.
+        public override int OnRecv(ArraySegment<byte> buffer)
         {
             string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);
             Console.WriteLine($"[From Server] {recvData}");
+            return buffer.Count;
         }
 
         public override void OnSend(int numofBytes)
@@ -54,28 +58,14 @@ namespace dummyClient
 
             while(true)
             {
-                // Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
-                    // 문지기에게 입장 요청, 게임에서는 blocking 계열을 쓰면 안됨
-                    // socket.Connect(endPoint);
-                    // Console.WriteLine($"Connected to {socket.RemoteEndPoint.ToString()}");
-              
-                    //// 받는다
-                    //byte[] recvBuff = new byte[1024];
-                    //int recvBytes = socket.Receive(recvBuff); 
-                    //string recvData = Encoding.UTF8.GetString(recvBuff, 0, recvBytes);
-                    //Console.WriteLine($"[From Server] {recvData}");
-
-                    // 나간다
-                    // socket.Shutdown(SocketShutdown.Both);
-                    // socket.Close();
+                    
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
                 }
-
                 Thread.Sleep(100);
             }
         }
