@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -6,8 +7,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServerCore;
 
+
 namespace Server
 {
+    class Knight
+    {
+        public int hp;
+        public int attack;
+        public int name;
+        public List<int> skills = new List<int>();
+        // 데이터의 크기를 예측할 수 없으므로 큰 버퍼를 만들어준다.
+        // 낭비되지 않게 차츰 사용해나가는 방식으로 만들기
+    }
+
     class GameSession : Session
     {
         // 엔진과 컨텐츠 분리
@@ -15,7 +27,20 @@ namespace Server
         {
             Console.WriteLine("OnConnected : {0}", endPoint);
 
-            byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server!");
+            Knight knight = new Knight() { hp = 100, attack = 10 };
+
+            // byte[] sendBuff = Encoding.UTF8.GetBytes("Welcome to MMORPG Server!");
+            // byte[] sendBuff = new byte[4096];
+
+            ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
+            byte[] buffer = BitConverter.GetBytes(knight.hp);
+            byte[] buffer2 = BitConverter.GetBytes(knight.attack);
+            Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+            Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer2.Length, buffer2.Length);
+            ArraySegment<byte> sendBuff = SendBufferHelper.Close(buffer.Length + buffer2.Length);
+
+            // 1 -> 이동패킷 100명
+            // 100 -> 이동패킷 100 * 100
             Send(sendBuff);
             Thread.Sleep(1000);
             Disconnect();

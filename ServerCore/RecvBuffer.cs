@@ -7,6 +7,7 @@ namespace ServerCore
 {
     public class RecvBuffer
     {
+        // [r][][][][w][][][][][]
         // byte 배열로 들고있어도 상관없지만 부분적으로 잘라서 사용하고 싶을 수 도 있으므로 
         ArraySegment<byte> _buffer;
         int _readPos; // 패킷이 완성되기 전까지는 처리하지 않음
