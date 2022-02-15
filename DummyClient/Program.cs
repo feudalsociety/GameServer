@@ -1,60 +1,13 @@
 ﻿using ServerCore;
 using System;
 using System.Net;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading; 
 
-namespace dummyClient
+namespace DummyClient
 {
-    class Packet
-    {
-        public ushort size;
-        public ushort packetId;
-    }
-
-    class GameSession : Session
-    {
-        // 엔진과 컨텐츠 분리
-        public override void OnConnected(EndPoint endPoint)
-        {
-            Console.WriteLine("OnConnected : {0}", endPoint);
-
-            Packet packet = new Packet() { size = 4, packetId = 7 };
-
-            for (int i = 0; i < 5; i++)
-            {
-                //byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
-                //Send(sendBuff);
-                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
-                byte[] buffer = BitConverter.GetBytes(packet.size);
-                byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
-                Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
-                Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer2.Length, buffer2.Length);
-                ArraySegment<byte> sendBuff = SendBufferHelper.Close(packet.size);
-                Send(sendBuff);
-            }
-        }
-
-        public override void OnDisconnected(EndPoint endPoint)
-        {
-            Console.WriteLine($"OnDisconnected : {endPoint}");
-        }
-
-        // 앞으로 패킷으로 보낼거임, 짤려서 왔으면 실행하면 안될것이다.
-        // TCP에서는 100byte를 보낸다고해서 무조건 100byte들 받는다는 보장이 없다.
-        public override int OnRecv(ArraySegment<byte> buffer)
-        {
-            string recvData = Encoding.UTF8.GetString(buffer.Array, buffer.Offset, buffer.Count);
-            Console.WriteLine($"[From Server] {recvData}");
-            return buffer.Count;
-        }
-
-        public override void OnSend(int numofBytes)
-        {
-            Console.WriteLine($"Transferred bytes : {numofBytes}");
-        }
-    }
 
     class Program
     {
@@ -66,7 +19,7 @@ namespace dummyClient
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
             Connector connector = new Connector();
-            connector.Connect(endPoint, () => { return new GameSession(); });
+            connector.Connect(endPoint, () => { return new ServerSession(); });
 
             while(true)
             {

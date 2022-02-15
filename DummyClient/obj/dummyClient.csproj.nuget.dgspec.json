@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj": {}
+    "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\DummyClient.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj": {
+    "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\DummyClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj",
-        "projectName": "dummyClient",
-        "projectPath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\dummyClient.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\DummyClient.csproj",
+        "projectName": "DummyClient",
+        "projectPath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\DummyClient.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\user\\Desktop\\unity study\\GameServer\\DummyClient\\obj\\",
         "projectStyle": "PackageReference",
