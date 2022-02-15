@@ -7,6 +7,12 @@ using System.Threading;
 
 namespace dummyClient
 {
+    class Packet
+    {
+        public ushort size;
+        public ushort packetId;
+    }
+
     class GameSession : Session
     {
         // 엔진과 컨텐츠 분리
@@ -14,10 +20,18 @@ namespace dummyClient
         {
             Console.WriteLine("OnConnected : {0}", endPoint);
 
-            // 보낸다
+            Packet packet = new Packet() { size = 4, packetId = 7 };
+
             for (int i = 0; i < 5; i++)
             {
-                byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                //byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                //Send(sendBuff);
+                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
+                byte[] buffer = BitConverter.GetBytes(packet.size);
+                byte[] buffer2 = BitConverter.GetBytes(packet.packetId);
+                Array.Copy(buffer, 0, openSegment.Array, openSegment.Offset, buffer.Length);
+                Array.Copy(buffer2, 0, openSegment.Array, openSegment.Offset + buffer2.Length, buffer2.Length);
+                ArraySegment<byte> sendBuff = SendBufferHelper.Close(packet.size);
                 Send(sendBuff);
             }
         }
@@ -27,8 +41,7 @@ namespace dummyClient
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
-        // 이동패킷 ((3,2) 좌표로 이동하고 싶다!)
-        // 패킷번호(15) 3 2
+        // 앞으로 패킷으로 보낼거임, 짤려서 왔으면 실행하면 안될것이다.
         // TCP에서는 100byte를 보낸다고해서 무조건 100byte들 받는다는 보장이 없다.
         public override int OnRecv(ArraySegment<byte> buffer)
         {
@@ -47,7 +60,6 @@ namespace dummyClient
     {
         static void Main(string[] args)
         {
-            // DNS (Domain Name System)
             string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];

@@ -5,11 +5,42 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-// ReciveComplete했을 때 handler를 실행하기 위한 event 받는 방식
-// 1. Eventhandler Class로 연결, 2. Session 상속받는 방법
-
 namespace ServerCore
 {
+    // parsing
+    public abstract class PacketSession : Session
+    {
+        public readonly int HeaderSize = 2;
+        // [size(2)][packetId(2)][...]  [size(2)][packetId(2)][...]
+        // size는 자신을 포함한 크기
+        public sealed override int OnRecv(ArraySegment<byte> buffer)
+        {
+            int processLen = 0; // 몇byte를 처리했는지
+
+            while(true) // 패킷을 처리할 수 있을때까지
+            {
+                // 최소한 header은 parsing할 수 있는지 확인
+                if (buffer.Count < HeaderSize) break;
+
+                // 패킷이 완전체로 도착했는지
+                ushort dataSize = BitConverter.ToUInt16(buffer.Array, buffer.Offset);
+                if (buffer.Count < dataSize) break;
+
+                // 여기까지 왔으면 패킷 조립 가능, 패킷을 만들어서 보내도 되고, 영역을보내도 되고
+                OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
+                // ArraySegment는 class가 아니다. new를 붙여준다고 해도 heap 영역에 할당되는 것이 아님
+
+                processLen += dataSize;
+                buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
+            }
+
+            return 0;
+        }
+
+        public abstract void OnRecvPacket(ArraySegment<byte> buffer);
+
+    }
+
     public abstract class Session
     {
         Socket _socket;
@@ -32,8 +63,6 @@ namespace ServerCore
         {
             _socket = socket;
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
-            // _recvArgs.SetBuffer(new byte[1024], 0, 1024);
-
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
 
             RegisterRecv();
@@ -65,7 +94,6 @@ namespace ServerCore
             {
                 ArraySegment<byte> buff = _sendQueue.Dequeue();
                 _pendingList.Add(buff);
-                // _pendingList.Add(new ArraySegment<byte>(buff, 0, buff.Length));
             }
 
             _sendArgs.BufferList = _pendingList;
@@ -127,7 +155,6 @@ namespace ServerCore
 
                     // 컨텐츠 쪽으로 데이터를 넘겨주고 얼마나 처리했는지 받는다.
                     int processLen = OnRecv(_recvBuffer.ReadSegment);
-                    // OnRecv(new ArraySegment<byte>(args.Buffer, args.Offset, args.BytesTransferred));
                     if(processLen < 0 || _recvBuffer.DataSize < processLen)
                     {
                         Disconnect();

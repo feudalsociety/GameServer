@@ -7,14 +7,6 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    // client가 보내는정보가 각기 다르기 떄문에 RecvBuffer는 session마다 고유의 buffer를 가지고 있음 
-    // Sendbuffer는 외부에 있다.
-    // Sendbuffer를 내부에서 복사를 하는 방식을 채택하면 성능적 문제가 있음.
-    // 외부에서 buffer를 만들어준다음에 꽂아넣는 방식이 복사의 횟수가 현저히 줄어든다. 
-
-    // _usedSize를 초기화하기 까다로움 - 한명한테 보내는게 아니라서 이전에 있던 부분을 다른 세션에서 send를하기 위해 Sendqueue에 넣어논 상태일 수 있기때문에
-    // 1회용으로만 사용
-
      public class SendBufferHelper
     {
         // 전역을 만들면 thread끼리 서로 경합하니까 ThreadLocal 이용, 맨처음에 만들어줄때 무엇을 할것인지 람다로 전달
@@ -39,7 +31,6 @@ namespace ServerCore
 
     public class SendBuffer
     {
-        // [][][][u][][][][][][]
         byte[] _buffer;
         int _usedSize = 0;
 
