@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServerCore;
 
-// 이렇게 ClientSession과 ServerSession 이름을 나누는 이유, Session이 여러개 필요할 수도 있다.
-// Server에 연결하는 대상이 꼭 Client만 있는게 아니다. 서버 끼리도 dataBase를 관리하는 db서버랑도 통신할 수 있다.
 namespace Server
 {
     public abstract class Packet
@@ -25,21 +23,54 @@ namespace Server
         public long playerId;
         public string name;
 
+        // list안에 구조체 형태의 데이터가 들어있을 경우?
+        public List<SkillInfo> skills = new List<SkillInfo> { };
+
+        public struct SkillInfo
+        {
+            public int id;
+            public short level;
+            public float duration;
+
+            // s에 전체 배열을 넣어줌
+            public bool Write(Span<byte> s, ref ushort count)
+            {
+                bool success = true;
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), id);
+                count += sizeof(int);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), level);
+                count += sizeof(short);
+                success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), duration);
+                count += sizeof(float);
+                return success;
+            }
+
+            public void Read(ReadOnlySpan<byte> s, ref ushort count)
+            {
+                id = BitConverter.ToInt32(s.Slice(count, s.Length - count));
+                count += sizeof(int);
+                level = BitConverter.ToInt16(s.Slice(count, s.Length - count));
+                count += sizeof(short);
+                duration = BitConverter.ToSingle(s.Slice(count, s.Length - count));
+                count += sizeof(float);
+            }
+        }
+
         public PlayerInfoReq()
         {
             this.packetId = (ushort)PacketID.PlayerInfoReq;
         }
 
-        // size가 넘는지 check 안하고 강제로 뒤에 있는 값을 추출하면 정상적으로 추출이 됨
         public override void Read(ArraySegment<byte> segment)
         {
             ushort count = 0;
 
             ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
-            
-            count += sizeof(ushort);
-            count += sizeof(ushort);
 
+            count += sizeof(ushort);
+            count += sizeof(ushort);
+            // this.playerId = BitConverter.ToInt64(s.Array, s.Offset + count);
+            // 범위를 집어주면서, 만약에 범위를 초과하는 값을 parsing을 하려고하면 자동으로 error
             this.playerId = BitConverter.ToInt64(s.Slice(count, s.Length - count));
             count += sizeof(long);
 
@@ -47,6 +78,18 @@ namespace Server
             ushort nameLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
             count += sizeof(ushort);
             this.name = Encoding.Unicode.GetString(s.Slice(count, nameLen)); // 문제가 생기면 try catch로 넘어감
+            count += nameLen;
+
+            // skill list
+            skills.Clear();
+            ushort skillLen = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+            count += sizeof(ushort);
+            for (int i = 0; i < skillLen; i++)
+            {
+                SkillInfo skill = new SkillInfo();
+                skill.Read(s, ref count);
+                skills.Add(skill);
+            }
         }
 
         public override ArraySegment<byte> Write()
@@ -59,15 +102,23 @@ namespace Server
             Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
 
             count += sizeof(ushort);
+            // 굳이 packetid를 사용해야할까? (ushort)PacktID.PlayerInfoReq 써도됨. size도 packet 자체에서는 이용하지 않는다.
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId);
             count += sizeof(ushort);
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
             count += sizeof(long);
 
+            // 몇바이트를 복사했는지 int 형으로 return
             ushort nameLen = (ushort)Encoding.Unicode.GetBytes(this.name, 0, this.name.Length, segment.Array, segment.Offset + count + sizeof(ushort));
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), nameLen);
             count += sizeof(ushort);
             count += nameLen;
+
+            // skill list
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)skills.Count);
+            count += sizeof(ushort);
+            foreach (SkillInfo skill in skills)
+                success &= skill.Write(s, ref count);
 
             // size에 count 값을 복사
             success &= BitConverter.TryWriteBytes(s, count);
@@ -119,6 +170,11 @@ namespace Server
                         PlayerInfoReq p = new PlayerInfoReq();
                         p.Read(buffer);
                         Console.WriteLine($"PlayerInfoReq : {p.playerId} {p.name}");
+
+                        foreach(PlayerInfoReq.SkillInfo skill in p.skills)
+                        {
+                            Console.WriteLine($"Skill({skill.id})({skill.level})({skill.duration})");
+                        }
                     }
                     break;
             }
