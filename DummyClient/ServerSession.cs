@@ -8,22 +8,21 @@ using System.Threading;
 
 namespace DummyClient
 {
-    public abstract class Packet
-    {
-        public ushort size;
-        public ushort packetId;
-        public abstract ArraySegment<byte> Write();
-        public abstract void Read(ArraySegment<byte> s);
-    }
+    // 헤더에 들어가는 정보를 실질적으로 사용하지 않으니까 자동화를 간략하게 하기 위해서 뺌
+    //public abstract class Packet
+    //{
+    //    public ushort size;
+    //    public ushort packetId;
+    //    public abstract ArraySegment<byte> Write();
+    //    public abstract void Read(ArraySegment<byte> s);
+    //}
+
 
     // client에서 요청
-    class PlayerInfoReq : Packet
+    class PlayerInfoReq 
     {
         public long playerId;
         public string name;
-
-        // list안에 구조체 형태의 데이터가 들어있을 경우?
-        public List<SkillInfo> skills = new List<SkillInfo> { };
 
         public struct SkillInfo
         {
@@ -55,12 +54,10 @@ namespace DummyClient
             }
         }
 
-        public PlayerInfoReq()
-        {
-            this.packetId = (ushort)PacketID.PlayerInfoReq;
-        }
+        // list안에 구조체 형태의 데이터가 들어있을 경우?
+        public List<SkillInfo> skills = new List<SkillInfo>();
 
-        public override void Read(ArraySegment<byte> segment)
+        public void Read(ArraySegment<byte> segment)
         {
             ushort count = 0;
 
@@ -91,7 +88,7 @@ namespace DummyClient
             }
         }
 
-        public override ArraySegment<byte> Write()
+        public ArraySegment<byte> Write()
         {
             ArraySegment<byte> segment = SendBufferHelper.Open(4096);
 
@@ -102,7 +99,7 @@ namespace DummyClient
 
             count += sizeof(ushort);
             // 굳이 packetid를 사용해야할까? (ushort)PacktID.PlayerInfoReq 써도됨. size도 packet 자체에서는 이용하지 않는다.
-            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.packetId);
+            success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.PlayerInfoReq);
             count += sizeof(ushort);
             success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
             count += sizeof(long);
@@ -143,6 +140,9 @@ namespace DummyClient
             Console.WriteLine("OnConnected : {0}", endPoint);
 
             // size는 시작에서는 모르고 마지막에서야 알수 있다.
+            // 더 최적화 한다면 바로 byte배열에다가 data를 밀어넣을 수 있게 만들 수 도 있다.
+            // 자주 사용하는 google protobuf (중간에 instance를 만들어서 채우는 방식), flatbuffer (바로 집어넣음)
+            // 중간에 만들어서 넣는게 직관적이고 편하다.
             PlayerInfoReq packet = new PlayerInfoReq() { playerId = 1001, name = "ABCD" };
             packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 101, level = 1, duration = 3.0f });
             packet.skills.Add(new PlayerInfoReq.SkillInfo() { id = 201, level = 2, duration = 4.0f });

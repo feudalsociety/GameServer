@@ -23,9 +23,6 @@ namespace Server
         public long playerId;
         public string name;
 
-        // list안에 구조체 형태의 데이터가 들어있을 경우?
-        public List<SkillInfo> skills = new List<SkillInfo> { };
-
         public struct SkillInfo
         {
             public int id;
@@ -55,6 +52,9 @@ namespace Server
                 count += sizeof(float);
             }
         }
+
+        // list안에 구조체 형태의 데이터가 들어있을 경우?
+        public List<SkillInfo> skills = new List<SkillInfo>();
 
         public PlayerInfoReq()
         {
