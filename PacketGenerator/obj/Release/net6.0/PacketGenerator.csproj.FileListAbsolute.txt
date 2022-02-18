@@ -1,0 +1,15 @@
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\PacketGenerator.exe
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\PacketGenerator.deps.json
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\PacketGenerator.runtimeconfig.json
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\PacketGenerator.dll
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\ref\PacketGenerator.dll
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\bin\Release\net6.0\PacketGenerator.pdb
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.csproj.AssemblyReference.cache
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.AssemblyInfo.cs
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.dll
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\ref\PacketGenerator.dll
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.pdb
+C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Release\net6.0\PacketGenerator.genruntimeconfig.cache

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// 이중 리스트의 경우
+// 이중 리스트도 지원하고 싶으면 struct를 class로 변환, 아니면 Onconncected에 패킷을 쏴주는 부분에서 field initializer을 사용하지 못하므로 생성자를 정의해야한다.
 namespace PacketGenerator
 {
     internal class PacketFormat

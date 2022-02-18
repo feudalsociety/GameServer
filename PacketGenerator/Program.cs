@@ -13,12 +13,17 @@ namespace  PacketGenerator
 
         static void Main(string[] args)
         {
+            string pdlPath = "../../../PDL.xml";
+                
             XmlReaderSettings settings = new XmlReaderSettings()
             {
                 IgnoreComments = true,
                 IgnoreWhitespace = true
             };
-            using (XmlReader r = XmlReader.Create("PDL.xml", settings))
+
+            if(args.Length >= 1) pdlPath = args[0];
+
+            using (XmlReader r = XmlReader.Create(pdlPath, settings))
             {
                 r.MoveToContent();
 
@@ -32,7 +37,7 @@ namespace  PacketGenerator
                 }
 
                 string FileText = string.Format(PacketFormat.fileFormat, packetEnums, genPackets);
-                File.WriteAllText("GenPacket.cs", FileText);
+                File.WriteAllText("GenPackets.cs", FileText);
             }
             // r.Dispose(); using문을 사용하여 알아서 호출하도록 한다.
         }
