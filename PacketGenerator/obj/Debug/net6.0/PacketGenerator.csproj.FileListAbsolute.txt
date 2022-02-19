@@ -1,4 +1,3 @@
-C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Debug\net6.0\PacketGenerator.csproj.AssemblyReference.cache
 C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Debug\net6.0\PacketGenerator.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Debug\net6.0\PacketGenerator.AssemblyInfoInputs.cache
 C:\Users\user\Desktop\unity study\GameServer\PacketGenerator\obj\Debug\net6.0\PacketGenerator.AssemblyInfo.cs

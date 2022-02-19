@@ -18,11 +18,11 @@ namespace DummyClient
             // 더 최적화 한다면 바로 byte배열에다가 data를 밀어넣을 수 있게 만들 수 도 있다.
             // 자주 사용하는 google protobuf (중간에 instance를 만들어서 채우는 방식), flatbuffer (바로 집어넣음)
             // 중간에 만들어서 넣는게 직관적이고 편하다.
-            PlayerInfoReq packet = new PlayerInfoReq() { playerId = 1001, name = "ABCD" };
-            packet.skills.Add(new PlayerInfoReq.Skill() { id = 101, level = 1, duration = 3.0f });
-            packet.skills.Add(new PlayerInfoReq.Skill() { id = 201, level = 2, duration = 4.0f });
-            packet.skills.Add(new PlayerInfoReq.Skill() { id = 301, level = 3, duration = 5.0f });
-            packet.skills.Add(new PlayerInfoReq.Skill() { id = 401, level = 4, duration = 6.0f });
+            C_PlayerInfoReq packet = new C_PlayerInfoReq() { playerId = 1001, name = "ABCD" };
+            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 101, level = 1, duration = 3.0f });
+            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 201, level = 2, duration = 4.0f });
+            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 301, level = 3, duration = 5.0f });
+            packet.skills.Add(new C_PlayerInfoReq.Skill() { id = 401, level = 4, duration = 6.0f });
 
             // for (int i = 0; i < 5; i++)
             {

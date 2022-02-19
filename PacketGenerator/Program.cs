@@ -11,6 +11,9 @@ namespace  PacketGenerator
         static ushort packetId;
         static string? packetEnums;
 
+        static string? clientRegister;
+        static string? serverRegister;
+
         static void Main(string[] args)
         {
             string pdlPath = "../../../PDL.xml";
@@ -38,8 +41,11 @@ namespace  PacketGenerator
 
                 string FileText = string.Format(PacketFormat.fileFormat, packetEnums, genPackets);
                 File.WriteAllText("GenPackets.cs", FileText);
+                string clientManagerText = string.Format(PacketFormat.managerFormat, clientRegister);
+                File.WriteAllText("ClientPacketManager.cs", clientManagerText);
+                string serverManagerText = string.Format(PacketFormat.managerFormat, serverRegister);
+                File.WriteAllText("ServerPacketManager.cs", serverManagerText);
             }
-            // r.Dispose(); using문을 사용하여 알아서 호출하도록 한다.
         }
 
         public static void ParsePacket(XmlReader r)
@@ -62,6 +68,10 @@ namespace  PacketGenerator
             if (t == null) return;
             genPackets += string.Format(PacketFormat.packetFormat, packetName, t.Item1, t.Item2, t.Item3);
             packetEnums += string.Format(PacketFormat.packetEnumFormat, packetName, ++packetId) + Environment.NewLine + "\t";
+            if(packetName.StartsWith("S_") || packetName.StartsWith("s_"))
+                clientRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
+            else
+                serverRegister += string.Format(PacketFormat.managerRegisterFormat, packetName) + Environment.NewLine;
         }
 
         public static Tuple<string, string, string>? ParseMembers(XmlReader r)
