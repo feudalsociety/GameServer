@@ -113,6 +113,7 @@ namespace ServerCore
                         _sendArgs.BufferList = null;                         
                         _pendingList.Clear();
 
+                        // 몇바이트를 보냈는지 콘솔에 출력
                         OnSend(_sendArgs.BytesTransferred);
 
                         if(_sendQueue.Count > 0)
