@@ -13,6 +13,7 @@ namespace Server
     class Program
     {
         static Listener _listener = new Listener();
+        public static GameRoom Room = new GameRoom();
 
         static void Main(string[] args)
         {
@@ -23,7 +24,9 @@ namespace Server
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
-            _listener.Init(endPoint, () => { return new ClientSession(); });
+            // 개선을 하자면 중간에 SessionManager를 둬서 만들어주도록한다. session id나 count 관리
+            // Manager는 core에 들어가도되고 컨텐츠단에서 관리해도 됨
+            _listener.Init(endPoint, () => { return SessionManager.Instance.Generate(); });
             Console.WriteLine("Listening...");
 
             while (true)

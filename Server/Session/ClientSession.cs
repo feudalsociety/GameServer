@@ -11,17 +11,29 @@ namespace Server
 {
     class ClientSession : PacketSession
     {
+        // client session에서 내가 어떤 방에 있는지 궁금할 수 있으니까
+        public int SessionId { get; set; }
+        public GameRoom Room { get; set; }
+
         // 엔진과 컨텐츠 분리
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine("OnConnected : {0}", endPoint);
 
-            Thread.Sleep(5000);
-            Disconnect();
+            // 클라가 접속했으면 강제로 채팅방에 입장.
+            // 게임에서는 클라에서 모든 리소스로딩이 끝났다고 신호를 보내면 입장
+            Program.Room.Enter(this);
         }
 
         public override void OnDisconnected(EndPoint endPoint)
         {
+            SessionManager.Instance.Remove(this);
+            if(Room != null)
+            {
+                Room.Leave(this);
+                Room = null;
+            }
+
             Console.WriteLine($"OnDisconnected : {endPoint}");
         }
 
