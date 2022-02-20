@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServerCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +7,24 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    class GameRoom
+    class GameRoom : IJobQueue
     {
         // 자료구조는 dictionary로 id와 session둘 다 가지고 있어도 된다.
         List<ClientSession> _sessions = new List<ClientSession>();
 
         // packet이 조립되어 handler로 넘어오는것은 동시다발적으로 여러 thread에서 일어날 수 있어서
         // enter와 leave도 동시다발적으로 실행
-        object _lock = new object();
+        // object _lock = new object();
+        // 하나의 Thread만 Flush할 수 있음이 보장되므로 Jobqueue를 사용할때 굳이 lock을 사용할 필요가 없다
+
+        JobQueue _jobQueue = new JobQueue();
+        // 1. main thread나 다른애가 순차적으로 queue에 있는걸 실행
+        // 2. push를 할때 맨처음으로 일감을 밀어넣으면 실제 실행까지 바로 진행
+
+        public void Push(Action job)
+        {
+            _jobQueue.Push(job);
+        }
 
         public void Broadcast(ClientSession session, string chat)
         {
@@ -22,35 +33,22 @@ namespace Server
             packet.chat = $"{chat} I am {packet.playerId}";
             ArraySegment<byte> segment = packet.Write();
 
-            // seamless game의 경우 broadcasting 공간을 잡는게 어렵다.
-            // 여기서 계속 시간이 밀려서 회수되지 않은 채로 pool에서 새로 생성한다.
-            // lock을 잡고 모든 부분을 실행하면 제대로 돌아갈 확률이 낮음. 패킷이 몰릴 수 있다.
-            // lock을 잡아서 실행하는것이 아닌 실질적으로 gameRoom을 담당해서 실행하는 것은 한명만 실행되게끔 만들어줘야함
-            // 일감을 그냥 queue에다 넣고 실제로 queue는 한번에 하나씩만 작동하게끔 한다.
-            // 일감 job이라고 부르는 경우. task라고 부르는 경우
-            // 패킷이 왔다는것을 wrapping해서 나중에 여유가 될 때 처리하게끔 미루는것이 핵심
-            lock (_lock)
-            {
-                foreach (ClientSession s in _sessions)
-                    s.Send(segment);
-            }
+            // lock (_lock)
+            foreach (ClientSession s in _sessions)
+                s.Send(segment);
         }
 
         public void Enter(ClientSession session)
         {
-            lock (_lock)
-            {
-                _sessions.Add(session);
-                session.Room = this;
-            }
+            // lock (_lock)
+            _sessions.Add(session);
+            session.Room = this;
         }
 
         public void Leave(ClientSession session)
         {
-            lock (_lock)
-            {
-                _sessions.Remove(session);
-            }
+            // lock (_lock)
+            _sessions.Remove(session);
         }
     }
 }

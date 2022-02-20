@@ -20,9 +20,9 @@ namespace Server
         {
             Console.WriteLine("OnConnected : {0}", endPoint);
 
-            // 클라가 접속했으면 강제로 채팅방에 입장.
-            // 게임에서는 클라에서 모든 리소스로딩이 끝났다고 신호를 보내면 입장
-            Program.Room.Enter(this);
+            // 전역 room이므로 문제 없음
+            Program.Room.Push(() => Program.Room.Enter(this));
+            // Program.Room.Enter(this); // jobQueue 이용, 직접호출불가능
         }
 
         public override void OnDisconnected(EndPoint endPoint)
@@ -30,7 +30,12 @@ namespace Server
             SessionManager.Instance.Remove(this);
             if(Room != null)
             {
-                Room.Leave(this);
+                // 이렇게 하면 crash나는 상황이 없어짐. 
+                GameRoom room = Room;
+                // 마찬가지로 room이 null이되면 문제가 됨
+                // Room.Push(() => Room.Leave(this));
+                room.Push(() => room.Leave(this));
+                // Room.Leave(this);
                 Room = null;
             }
 
