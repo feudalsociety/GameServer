@@ -7,10 +7,9 @@ using System.Threading;
 
 namespace ServerCore
 {
-    // parsing
     public abstract class PacketSession : Session
     {
-        public readonly int HeaderSize = 2;
+        public static readonly int HeaderSize = 2;
         // [size(2)][packetId(2)][...]  [size(2)][packetId(2)][...]
         // size는 자신을 포함한 크기
         public sealed override int OnRecv(ArraySegment<byte> buffer)
@@ -34,7 +33,7 @@ namespace ServerCore
                 buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
             }
 
-            return 0;
+            return processLen;
         }
 
         public abstract void OnRecvPacket(ArraySegment<byte> buffer);
@@ -212,7 +211,6 @@ namespace ServerCore
                 Disconnect();
             }
         }
-
         #endregion
     }
 }

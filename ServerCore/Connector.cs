@@ -17,17 +17,21 @@ namespace ServerCore
         // Socket _socket; 
         Func<Session> _sesionFactory;
 
-        public void Connect(IPEndPoint endPoint, Func<Session> sesionFactory)
+        // count 옵션을 넣어서 여러개를 만들도록 추가
+        public void Connect(IPEndPoint endPoint, Func<Session> sesionFactory, int count = 1)
         {
-            Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            _sesionFactory = sesionFactory;
+            for (int i = 0; i < count; i++)
+            {
+                Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                _sesionFactory = sesionFactory;
 
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += OnConnectCompleted;
-            args.RemoteEndPoint = endPoint;
-            args.UserToken = socket;
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += OnConnectCompleted;
+                args.RemoteEndPoint = endPoint;
+                args.UserToken = socket;
 
-            RegisterConnect(args);
+                RegisterConnect(args);
+            }
         }
 
         void RegisterConnect(SocketAsyncEventArgs args)

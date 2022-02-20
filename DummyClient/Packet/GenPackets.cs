@@ -51,7 +51,7 @@ class C_Chat : IPacket
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.C_Chat);
         count += sizeof(ushort);
 
-        ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.name.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+        ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.chat.Length, segment.Array, segment.Offset + count + sizeof(ushort));
 		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
 		count += sizeof(ushort);
 		count += chatLen;
@@ -102,7 +102,7 @@ class S_Chat : IPacket
         success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), this.playerId);
 		count += sizeof(int);
 		
-		ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.name.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+		ushort chatLen = (ushort)Encoding.Unicode.GetBytes(this.chat, 0, this.chat.Length, segment.Array, segment.Offset + count + sizeof(ushort));
 		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), chatLen);
 		count += sizeof(ushort);
 		count += chatLen;
