@@ -19,7 +19,7 @@ namespace DummyClient
 
             Connector connector = new Connector();
             // client 몇개를 simulate 할건지 조절
-            connector.Connect(endPoint, () => { return SessionManager.Instance.Generate(); }, 10);
+            connector.Connect(endPoint, () => { return SessionManager.Instance.Generate(); }, 100);
 
             while(true)
             {
