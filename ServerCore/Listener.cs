@@ -12,7 +12,7 @@ namespace ServerCore
         Socket _listenSocket;
         Func<Session> _sessionFactory; // 어떤 Session을 만들어줄지 정의
 
-        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory)
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory, int register = 10, int backlog = 100)
         {
             _listenSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _sessionFactory += sessionFactory;
@@ -22,12 +22,16 @@ namespace ServerCore
 
             // 영업 시작
             // backlog : 최대 대기수
-            _listenSocket.Listen(10);
+            _listenSocket.Listen(backlog);
 
+            // register : 몇개를 등록할 것인가
             // 한번만 만들면 재사용 가능, 동시다발적으로 많은 유저를 받아야할 때 이부분을 for문을 걸어 늘려준다.
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs(); 
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
-            RegisterAccept(args);
+            for (int i = 0; i < register; i++)
+            {
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
+                RegisterAccept(args);
+            }
         }
 
         void RegisterAccept(SocketAsyncEventArgs args)

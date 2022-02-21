@@ -15,6 +15,7 @@ namespace ServerCore
         public sealed override int OnRecv(ArraySegment<byte> buffer)
         {
             int processLen = 0; // 몇byte를 처리했는지
+            int packetCount = 0;
 
             while(true) // 패킷을 처리할 수 있을때까지
             {
@@ -28,10 +29,14 @@ namespace ServerCore
                 // 여기까지 왔으면 패킷 조립 가능, 패킷을 만들어서 보내도 되고, 영역을보내도 되고
                 OnRecvPacket(new ArraySegment<byte>(buffer.Array, buffer.Offset, dataSize));
                 // ArraySegment는 class가 아니다. new를 붙여준다고 해도 heap 영역에 할당되는 것이 아님
+                packetCount++;
 
                 processLen += dataSize;
                 buffer = new ArraySegment<byte>(buffer.Array, buffer.Offset + dataSize, buffer.Count - dataSize);
             }
+            if (packetCount > 1)
+                Console.WriteLine($"패킷 모아 보내기 : {packetCount}");
+            // 100개씩 보냈는데 100개를 못받는 이유? - recv 버퍼 size가 너무 작아서 
 
             return processLen;
         }
@@ -45,7 +50,7 @@ namespace ServerCore
         Socket _socket;
         int _disconnected = 0;
 
-        RecvBuffer _recvBuffer = new RecvBuffer(1024);
+        RecvBuffer _recvBuffer = new RecvBuffer(65535);
 
         object _lock = new object(); 
         Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
@@ -55,7 +60,7 @@ namespace ServerCore
 
         public abstract void OnConnected(EndPoint endPoint);
         public abstract int OnRecv(ArraySegment<byte> buffer);     
-        public abstract void OnSend(int numofBytes);
+        public abstract void OnSend(int numofBytes); // 몇바이트를 보냈는지 콘솔에 출력
         public abstract void OnDisconnected(EndPoint endPoint);
 
         void Clear()
@@ -74,6 +79,20 @@ namespace ServerCore
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
 
             RegisterRecv();
+        }
+
+        public void Send(List<ArraySegment<byte>> sendBuffList)
+        {
+            if (sendBuffList.Count == 0) return;
+            // pending list에 빈 list를 넣어주고 send를하면 onSendCompleted에서 인자가 잘못됬으니까 바로 튕겨낸다.
+
+            lock (_lock)
+            {
+                foreach(ArraySegment<byte> sendBuff in sendBuffList)
+                    _sendQueue.Enqueue(sendBuff);
+
+                if (_pendingList.Count == 0) RegisterSend();
+            }
         }
 
         public void Send(ArraySegment<byte> sendBuff)

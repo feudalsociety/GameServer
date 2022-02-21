@@ -15,7 +15,7 @@ class PacketHandler
 
         // 다수의 client를 simulation하고 있어서 모든 messeage를 다 출력하면 너무 많아짐
         // if (chatPacket.playerId == 1)
-            Console.WriteLine(chatPacket.chat);
+           // Console.WriteLine(chatPacket.chat);
     }
 }
 
