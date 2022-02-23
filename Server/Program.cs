@@ -35,28 +35,6 @@ namespace Server
             _listener.Init(endPoint, () => { return SessionManager.Instance.Generate(); });
             Console.WriteLine("Listening...");
 
-            // 시간 관리 tick을 이용
-            // 패킷 핸들러에서는 queue에만 넣고 빠지고 실제 연산은 main에서 처리
-
-            // int roomTick = 0;
-            //
-            //
-            //while (true)
-            //{
-            //    // int now = System.Environment.TickCount;
-            //    // if(roomTick < now)
-            //    {
-            //        Room.Push(() => Room.Flush());
-            //        // roomTick = now + 250000;
-            //        // 한참 있다가 실행되는 경우 불필요하게 check
-            //        // 예약 system이 있으면 좋곘다. - unity에서 코루틴 이용
-            //        // 컨텐츠 단 뿐만아니라 서버 쪽에도 그런거 있으면 편리할 것이다.
-            //        // 구현방법은 여러가지 - 우선순위 큐 이용 
-            //    }
-
-            //    //
-            //}
-
             //FlushRoom(); // 예약
             JobTimer.Instance.Push(FlushRoom);
             // 다른 thread에서 JobTimer라는 중앙관리 시스템에 일감을 던져서 예약하게될것
@@ -69,3 +47,6 @@ namespace Server
         }
     }
 }
+
+// dll를 빌드해서 그대로 unity에 옮기면 디버깅할 때 힘들다.
+// 처음에는 코드를 수동으로 가지고 온다음에 걸러내는게 좋다.

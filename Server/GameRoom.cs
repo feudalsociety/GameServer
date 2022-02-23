@@ -18,7 +18,6 @@ namespace Server
         // 여기서는 컨텐츠 단에서 모아보내기 방법
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
 
-
         public void Push(Action job)
         {
             _jobQueue.Push(job);

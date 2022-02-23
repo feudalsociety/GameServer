@@ -19,6 +19,11 @@ namespace Server
         }
     }
 
+    // 경우에 따라서 여기서 더 최적하는 경우도 있다. 2개로 분리
+    // 시간이 임박하면 리스트로 관리
+    // [20ms 이 시점에 실행되어야하는 job들이 여기에 list로 연결됨][20ms][20ms][20ms][][][]...
+    // 여유롭게 시간이 남은 job들은 우선순위 큐로 관리
+    // 100ms에 실행되야하는거라면 다섯번째 버킷에 넣음
     class JobTimer
     {
         PriorityQueue<JobTimerElem> _pq = new PriorityQueue<JobTimerElem>();
@@ -62,3 +67,5 @@ namespace Server
         }
     }
 }
+// background thread에서 unity game에서 관리하는 객체에 접근하거나 코드를 실행하면 crash
+// game logic은 mainthread에서만 하도록
