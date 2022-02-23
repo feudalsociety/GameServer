@@ -13,7 +13,7 @@ namespace Server
         public static SessionManager Instance { get { return _session; } }
 
         // 발급을 하기 위한 티켓 번호 0부터시작해서 증가
-        int _sessionId = 0; 
+        int _sessionId = 0;
         Dictionary<int, ClientSession> _sessions = new Dictionary<int, ClientSession>();
         object _lock = new object();
 

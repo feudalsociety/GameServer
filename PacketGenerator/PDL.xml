@@ -1,10 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Naming Convention 
+  C_ : Client에서 보내는 packet, S_ Server에서 보내는 패킷
+  Broadcast 용도로 사용할 packet 앞에 Broadcast를 붙인다.
+  vector3 타입을 정의해서 자동화 코드를 만들어도 된다.
+  S_PlayerList : 기존에 있었던 유저 목록
+  isSelf : 자신이 컨트롤하는지 구분, 경우에 따라서 나의 정보를 보내는 별도의 패킷을 파는것도 좋다
+  C_Move는 client session으로 어떤 session한테 왔는지 포함되서 굳이 player id를 넣을 필요없다.-->
 <PDL>
-  <packet name="C_Chat">
-    <string name="chat"/>
-  </packet>
-  <packet name="S_Chat">
+  <packet name="S_BroadcastEnterGame">
     <int name="playerId"/>
-    <string name="chat"/>
+    <float name="posX"/>
+    <float name="posY"/>
+    <float name="posZ"/>
+  </packet>
+  <packet name="C_LeaveGame">
+  </packet>
+  <packet name="S_BroadcastLeaveGame">
+    <int name="playerId"/>
+  </packet>
+  <packet name="S_PlayerList">
+    <list name="player">
+      <bool name="isSelf"/>
+      <int name="playerId"/>
+      <float name="posX"/>
+      <float name="posY"/>
+      <float name="posZ"/>
+    </list>
+  </packet>
+  <packet name="C_Move">
+    <float name="posX"/>
+    <float name="posY"/>
+    <float name="posZ"/>
+  </packet>
+  <packet name="S_BroadcastMove">
+    <int name="playerId"/>
+    <float name="posX"/>
+    <float name="posY"/>
+    <float name="posZ"/>
   </packet>
 </PDL>

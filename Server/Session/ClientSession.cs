@@ -9,20 +9,26 @@ using ServerCore;
 
 namespace Server
 {
+    // 모든 정보를 clientsession에 넣지 않고, 새로운 class 예를 들면 player class를 판다음에 
+    // 거기다 컨텐츠 코드를 넣어넣고 player가 연결된 client sessions을 물고있게끔 만들어줌
+    // 일단은 간단하게 하기 위해서 여기다 모든 정보를 넣어둠
     class ClientSession : PacketSession
     {
         // client session에서 내가 어떤 방에 있는지 궁금할 수 있으니까
         public int SessionId { get; set; }
         public GameRoom Room { get; set; }
+        public float PosX { get; set; }
+        public float PosY { get; set; }
+        public float PosZ { get; set; }
+
 
         // 엔진과 컨텐츠 분리
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine("OnConnected : {0}", endPoint);
-
-            // 전역 room이므로 문제 없음
+            // client가 접속 했을 때 바로 입장시키지 않고 client쪽으로 승인을 보내고
+            // client쪽에서 모든 resource를 load 했을 때 ok packet을 보내면 방에 입장
             Program.Room.Push(() => Program.Room.Enter(this));
-            // Program.Room.Enter(this); // jobQueue 이용, 직접호출불가능
         }
 
         public override void OnDisconnected(EndPoint endPoint)
